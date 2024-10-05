@@ -357,7 +357,7 @@ const neas = [];
 for (let i = 0; i < 10; i++) {
   const nea = createRandomOrbitObject(
     0.5 + Math.random() * 1.5, // Size between 0.5 and 2
-    0x8b4513, // Brown color
+    "#dbe9f4", // Brown color
     80 + Math.random() * 40, // Orbit radius between 80 and 120
     (Math.random() * Math.PI) / 4 // Random tilt up to 45 degrees
   );
