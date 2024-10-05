@@ -336,6 +336,57 @@ document.getElementById("look").addEventListener("click", () => {
     document.getElementById("card-container").innerHTML = "";
   }
 });
+
+// Add new objects for NEAs, NECs, and PHAs
+const createRandomOrbitObject = (size, color, orbitRadius, orbitTilt) => {
+  const geometry = new THREE.SphereGeometry(size, 16, 16);
+  const material = new THREE.MeshBasicMaterial({ color: color });
+  const object = new THREE.Mesh(geometry, material);
+
+  const orbit = new THREE.Object3D();
+  orbit.rotation.x = orbitTilt;
+  orbit.add(object);
+  object.position.set(orbitRadius, 0, 0);
+
+  scene.add(orbit);
+  return { object, orbit };
+};
+
+// Create multiple NEAs
+const neas = [];
+for (let i = 0; i < 10; i++) {
+  const nea = createRandomOrbitObject(
+    0.5 + Math.random() * 1.5, // Size between 0.5 and 2
+    0x8b4513, // Brown color
+    80 + Math.random() * 40, // Orbit radius between 80 and 120
+    (Math.random() * Math.PI) / 4 // Random tilt up to 45 degrees
+  );
+  neas.push(nea);
+}
+
+// Create a few NECs
+const necs = [];
+for (let i = 0; i < 3; i++) {
+  const nec = createRandomOrbitObject(
+    0.8 + Math.random() * 1.8, // Size between 1 and 3
+    "#FFFFFF", // Steel Blue color
+    120 + Math.random() * 60, // Orbit radius between 120 and 180
+    (Math.random() * Math.PI) / 3 // Random tilt up to 60 degrees
+  );
+  necs.push(nec);
+}
+
+// Create a couple of PHAs
+const phas = [];
+for (let i = 0; i < 2; i++) {
+  const pha = createRandomOrbitObject(
+    2 + Math.random() * 3, // Size between 2 and 5
+    "#808080", // Orange Red color
+    90 + Math.random() * 30, // Orbit radius between 90 and 120
+    (Math.random() * Math.PI) / 6 // Random tilt up to 30 degrees
+  );
+  phas.push(pha);
+}
 // all movement stuff done here
 function System() {
   const animate = (orbitFactor, rotateFactor) => {
@@ -401,7 +452,29 @@ function System() {
     pluto.position.z = Math.cos(timestamp * 0.1) * 340;
     pluto.position.y = Math.sin(timestamp * 0.1) * 20;
 
-    requestAnimationFrame(System);
+    // requestAnimationFrame(System);
+    // Animate NEAs
+    neas.forEach((nea, index) => {
+      const speed = 0.005 + index * 0.001;
+      nea.orbit.rotation.y += speed * orbitFactor;
+      nea.object.rotation.y += 0.02 * rotateFactor;
+    });
+
+    // Animate NECs
+    necs.forEach((nec, index) => {
+      const speed = 0.003 + index * 0.001;
+      nec.orbit.rotation.y += speed * orbitFactor;
+      nec.object.rotation.y += 0.01 * rotateFactor;
+    });
+
+    // Animate PHAs
+    phas.forEach((pha, index) => {
+      const speed = 0.004 + index * 0.002;
+      pha.orbit.rotation.y += speed * orbitFactor;
+      pha.object.rotation.y += 0.03 * rotateFactor;
+    });
+
+    requestAnimationFrame(() => animate(orbitFactor, rotateFactor));
   };
   animate(orbitFactor, rotateFactor);
 }
