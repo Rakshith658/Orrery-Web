@@ -603,7 +603,6 @@ function System() {
       );
       if (bodyName) {
         labelDiv.textContent = `${celestialBodies[bodyName].label} = ${celestialBodies[bodyName].info}`;
-        // labelDiv.textContent = celestialBodies[bodyName].info;
         labelDiv.style.display = "block";
       }
     } else {
