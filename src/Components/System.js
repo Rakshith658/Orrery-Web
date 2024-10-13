@@ -2,6 +2,9 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 // Setup
+// Add this after creating all the celestial bodies
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -387,6 +390,118 @@ for (let i = 0; i < 2; i++) {
   );
   phas.push(pha);
 }
+
+// Update the celestialBodies object with more detailed information
+const celestialBodies = {
+  sun: {
+    mesh: sun,
+    label: "Sun",
+    info: "The star at the center of our Solar System. Diameter: 1,391,000 km. Surface temperature: 5,500°C.",
+  },
+  mercury: {
+    mesh: mercury,
+    label: "Mercury",
+    info: "Smallest planet, closest to the Sun. Diameter: 4,879 km. Day length: 59 Earth days.",
+  },
+  venus: {
+    mesh: venus,
+    label: "Venus",
+    info: "Often called Earth's twin. Diameter: 12,104 km. Rotates in opposite direction to most planets.",
+  },
+  earth: {
+    mesh: earth,
+    label: "Earth",
+    info: "Our home planet. Diameter: 12,742 km. Only known planet with life. One moon.",
+  },
+  moon: {
+    mesh: moon,
+    label: "Moon",
+    info: "Earth's only natural satellite. Diameter: 3,474 km. Distance from Earth: 384,400 km.",
+  },
+  mars: {
+    mesh: mars,
+    label: "Mars",
+    info: "The Red Planet. Diameter: 6,779 km. Has the largest volcano in the Solar System: Olympus Mons.",
+  },
+  jupiter: {
+    mesh: jupiter,
+    label: "Jupiter",
+    info: "Largest planet in our Solar System. Diameter: 139,820 km. Has a Great Red Spot, a giant storm.",
+  },
+  saturn: {
+    mesh: saturn,
+    label: "Saturn",
+    info: "Known for its prominent ring system. Diameter: 116,460 km. Has 82 known moons.",
+  },
+  uranus: {
+    mesh: uranus,
+    label: "Uranus",
+    info: "Ice giant, tilted on its side. Diameter: 50,724 km. Discovered in 1781 by William Herschel.",
+  },
+  neptune: {
+    mesh: neptune,
+    label: "Neptune",
+    info: "Windiest planet in our Solar System. Diameter: 49,244 km. Has 14 known moons.",
+  },
+  pluto: {
+    mesh: pluto,
+    label: "Pluto",
+    info: "Dwarf planet in the Kuiper belt. Diameter: 2,377 km. Discovered in 1930, reclassified in 2006.",
+  },
+  iss: {
+    mesh: iss,
+    label: "ISS",
+    info: "International Space Station. Length: 109m. Orbits Earth at about 400 km altitude.",
+  },
+};
+
+// Modify the labelDiv styles for better readability
+const labelDiv = document.createElement("div");
+labelDiv.style.position = "absolute";
+labelDiv.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+labelDiv.style.color = "white";
+labelDiv.style.padding = "10px";
+labelDiv.style.borderRadius = "5px";
+labelDiv.style.display = "none";
+labelDiv.style.maxWidth = "250px";
+labelDiv.style.fontSize = "14px";
+labelDiv.style.lineHeight = "1.4";
+document.body.appendChild(labelDiv);
+
+// Add event listeners
+renderer.domElement.addEventListener("mousemove", onMouseMove);
+renderer.domElement.addEventListener("mouseout", onMouseOut);
+
+function onMouseMove(event) {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  const intersects = raycaster.intersectObjects(
+    Object.values(celestialBodies).map((body) => body.mesh)
+  );
+
+  if (intersects.length > 0) {
+    const intersectedObject = intersects[0].object;
+    const bodyName = Object.keys(celestialBodies).find(
+      (key) => celestialBodies[key].mesh === intersectedObject
+    );
+    if (bodyName) {
+      const body = celestialBodies[bodyName];
+      labelDiv.innerHTML = `<strong>${body.label}</strong><br>${body.info}`;
+      labelDiv.style.display = "block";
+      labelDiv.style.left = event.clientX + 15 + "px";
+      labelDiv.style.top = event.clientY + "px";
+    }
+  } else {
+    labelDiv.style.display = "none";
+  }
+}
+
+function onMouseOut() {
+  labelDiv.style.display = "none";
+}
 // all movement stuff done here
 function System() {
   const animate = (orbitFactor, rotateFactor) => {
@@ -473,6 +588,26 @@ function System() {
       pha.orbit.rotation.y += speed * orbitFactor;
       pha.object.rotation.y += 0.03 * rotateFactor;
     });
+    // Update the picking ray with the camera and mouse position
+    raycaster.setFromCamera(mouse, camera);
+
+    // Calculate objects intersecting the picking ray
+    const intersects = raycaster.intersectObjects(
+      Object.values(celestialBodies).map((body) => body.mesh)
+    );
+
+    if (intersects.length > 0) {
+      const intersectedObject = intersects[0].object;
+      const bodyName = Object.keys(celestialBodies).find(
+        (key) => celestialBodies[key].mesh === intersectedObject
+      );
+      if (bodyName) {
+        labelDiv.textContent = celestialBodies[bodyName].label;
+        labelDiv.style.display = "block";
+      }
+    } else {
+      labelDiv.style.display = "none";
+    }
 
     requestAnimationFrame(() => animate(orbitFactor, rotateFactor));
   };
