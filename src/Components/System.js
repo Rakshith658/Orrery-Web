@@ -489,7 +489,7 @@ function onMouseMove(event) {
     );
     if (bodyName) {
       const body = celestialBodies[bodyName];
-      labelDiv.innerHTML = `<strong>${body.label}</strong><br>${body.info}`;
+      labelDiv.innerHTML = `<strong>${body.info}</strong><br>${body.info}`;
       labelDiv.style.display = "block";
       labelDiv.style.left = event.clientX + 15 + "px";
       labelDiv.style.top = event.clientY + "px";
@@ -602,7 +602,8 @@ function System() {
         (key) => celestialBodies[key].mesh === intersectedObject
       );
       if (bodyName) {
-        labelDiv.textContent = celestialBodies[bodyName].label;
+        labelDiv.textContent = `${celestialBodies[bodyName].label} = ${celestialBodies[bodyName].info}`;
+        // labelDiv.textContent = celestialBodies[bodyName].info;
         labelDiv.style.display = "block";
       }
     } else {
