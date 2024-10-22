@@ -665,7 +665,7 @@ renderer.domElement.addEventListener("click", async (event) => {
 });
 
 // Create the message overlay when the scene initializes
-const messageOverlay = createMessageOverlay();
+createMessageOverlay();
 
 function onMouseMove(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -810,6 +810,7 @@ function System() {
       const bodyName = Object.keys(celestialBodies).find(
         (key) => celestialBodies[key].mesh === intersectedObject
       );
+
       if (bodyName) {
         labelDiv.textContent = `${celestialBodies[bodyName].label} = ${celestialBodies[bodyName].info}`;
         labelDiv.style.display = "block";
