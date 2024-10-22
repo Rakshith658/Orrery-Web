@@ -1,6 +1,88 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
+// Add audio setup at the beginning of the file
+let backgroundMusic;
+let isMusicPlaying = true; // Changed to true for default on
+
+// Create audio control button
+const createAudioControls = () => {
+  const audioButton = document.createElement("button");
+  audioButton.innerHTML = "🔊 Music On"; // Changed default text
+  audioButton.style.position = "fixed";
+  audioButton.style.bottom = "20px";
+  audioButton.style.right = "20px";
+  audioButton.style.padding = "10px 20px";
+  audioButton.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+  audioButton.style.color = "white";
+  audioButton.style.border = "1px solid white";
+  audioButton.style.borderRadius = "5px";
+  audioButton.style.cursor = "pointer";
+  audioButton.style.zIndex = "1000";
+
+  // Initialize audio
+  backgroundMusic = new Audio();
+  backgroundMusic.src = require("../assets/space-ambient.mp3");
+  backgroundMusic.loop = true;
+  backgroundMusic.volume = 0.3;
+
+  // Auto-play music (will only work after user interaction due to browser policies)
+  const startMusic = () => {
+    backgroundMusic.play().catch((e) => {
+      // Catch and handle any autoplay errors silently
+      console.log("Autoplay prevented - waiting for user interaction");
+    });
+  };
+
+  // Try to start music immediately
+  startMusic();
+
+  // Also attempt to start music on first user interaction
+  document.addEventListener(
+    "click",
+    () => {
+      if (!backgroundMusic.playing) {
+        startMusic();
+      }
+    },
+    { once: true }
+  );
+
+  audioButton.addEventListener("click", () => {
+    if (!isMusicPlaying) {
+      backgroundMusic.play();
+      audioButton.innerHTML = "🔊 Music On";
+      isMusicPlaying = true;
+    } else {
+      backgroundMusic.pause();
+      audioButton.innerHTML = "🔇 Music Off";
+      isMusicPlaying = false;
+    }
+  });
+
+  // Add volume control
+  const volumeSlider = document.createElement("input");
+  volumeSlider.type = "range";
+  volumeSlider.min = "0";
+  volumeSlider.max = "100";
+  volumeSlider.value = "30";
+  volumeSlider.style.position = "fixed";
+  volumeSlider.style.bottom = "60px";
+  volumeSlider.style.right = "20px";
+  volumeSlider.style.width = "100px";
+  volumeSlider.style.zIndex = "1000";
+
+  volumeSlider.addEventListener("input", (e) => {
+    backgroundMusic.volume = e.target.value / 100;
+  });
+
+  document.body.appendChild(audioButton);
+  document.body.appendChild(volumeSlider);
+};
+
+// Call createAudioControls after the scene setup
+createAudioControls();
+
 // Setup
 // Add this after creating all the celestial bodies
 const raycaster = new THREE.Raycaster();
@@ -504,6 +586,18 @@ function onMouseOut() {
 }
 // all movement stuff done here
 function System() {
+  // Initialize audio context on first user interaction
+  document.addEventListener(
+    "click",
+    () => {
+      if (backgroundMusic && backgroundMusic.paused) {
+        // Create audio context on user interaction to comply with browser policies
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioContext();
+      }
+    },
+    { once: true }
+  );
   const animate = (orbitFactor, rotateFactor) => {
     renderer.render(scene, camera);
     const EARTH_YEAR = rotateFactor * (50 * Math.PI * (1 / 60) * (1 / 60));
