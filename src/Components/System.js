@@ -549,10 +549,123 @@ labelDiv.style.maxWidth = "250px";
 labelDiv.style.fontSize = "14px";
 labelDiv.style.lineHeight = "1.4";
 document.body.appendChild(labelDiv);
+// Add message overlay
+const createMessageOverlay = () => {
+  const messageDiv = document.createElement("div");
+  messageDiv.style.position = "fixed";
+  messageDiv.style.top = "20px";
+  messageDiv.style.left = "50%";
+  messageDiv.style.transform = "translateX(-50%)";
+  messageDiv.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+  messageDiv.style.color = "white";
+  messageDiv.style.padding = "10px 20px";
+  messageDiv.style.borderRadius = "5px";
+  messageDiv.style.zIndex = "1000";
+  messageDiv.style.textAlign = "center";
+  messageDiv.innerHTML = "Click on any planet to zoom in and learn more!";
+  document.body.appendChild(messageDiv);
+  return messageDiv;
+};
+
+// Add camera animation function
+const animateCamera = (targetPosition, targetLookAt, duration = 1000) => {
+  const startPosition = camera.position.clone();
+  const startRotation = camera.quaternion.clone();
+
+  // Create a dummy object to look at the target
+  const dummyCamera = new THREE.Object3D();
+  dummyCamera.position.copy(targetPosition);
+  dummyCamera.lookAt(targetLookAt);
+  const targetRotation = dummyCamera.quaternion.clone();
+
+  const startTime = Date.now();
+
+  return new Promise((resolve) => {
+    function animate() {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Use easing function for smooth transition
+      const easeProgress = 1 - Math.cos(progress * Math.PI * 0.5);
+
+      // Interpolate position
+      camera.position.lerpVectors(startPosition, targetPosition, easeProgress);
+
+      // Interpolate rotation
+      camera.quaternion.slerpQuaternions(
+        startRotation,
+        targetRotation,
+        easeProgress
+      );
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        resolve();
+      }
+    }
+    animate();
+  });
+};
 
 // Add event listeners
 renderer.domElement.addEventListener("mousemove", onMouseMove);
 renderer.domElement.addEventListener("mouseout", onMouseOut);
+
+// Modify the existing mouse click handler
+renderer.domElement.addEventListener("click", async (event) => {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  const intersects = raycaster.intersectObjects(
+    Object.values(celestialBodies).map((body) => body.mesh)
+  );
+
+  if (intersects.length > 0) {
+    const intersectedObject = intersects[0].object;
+    const bodyName = Object.keys(celestialBodies).find(
+      (key) => celestialBodies[key].mesh === intersectedObject
+    );
+
+    if (bodyName) {
+      const body = celestialBodies[bodyName];
+      const position = body.mesh.position.clone();
+
+      // Calculate camera position for optimal viewing
+      const objectSize = body.mesh.geometry.parameters.radius;
+      const distance = objectSize * 20; // Adjust this multiplier to change zoom level
+
+      const cameraPosition = new THREE.Vector3();
+      cameraPosition.copy(position);
+      cameraPosition.z += distance;
+      cameraPosition.y += distance * 0.3;
+
+      // Disable controls during transition
+      if (controls) controls.enabled = false;
+
+      // Animate camera to new position
+      await animateCamera(cameraPosition, position);
+
+      // Re-enable controls and update their target
+      if (controls) {
+        controls.enabled = true;
+        controls.target.copy(position);
+        controls.update();
+      }
+
+      // Update the info display
+      labelDiv.innerHTML = `<strong>${body.label}</strong><br>${body.info}`;
+      labelDiv.style.display = "block";
+      labelDiv.style.left = event.clientX + 15 + "px";
+      labelDiv.style.top = event.clientY + "px";
+    }
+  }
+});
+
+// Create the message overlay when the scene initializes
+const messageOverlay = createMessageOverlay();
 
 function onMouseMove(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -689,6 +802,8 @@ function System() {
     const intersects = raycaster.intersectObjects(
       Object.values(celestialBodies).map((body) => body.mesh)
     );
+    // Update controls if they exist
+    if (controls) controls.update();
 
     if (intersects.length > 0) {
       const intersectedObject = intersects[0].object;
