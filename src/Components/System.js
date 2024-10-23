@@ -706,7 +706,7 @@ function System() {
       if (backgroundMusic && backgroundMusic.paused) {
         // Create audio context on user interaction to comply with browser policies
         const AudioContext = window.AudioContext || window.webkitAudioContext;
-        const audioContext = new AudioContext();
+        new AudioContext();
       }
     },
     { once: true }
