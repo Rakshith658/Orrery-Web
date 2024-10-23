@@ -1,6 +1,64 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
+const createLegendOverlay = () => {
+  const legendDiv = document.createElement("div");
+  legendDiv.style.position = "fixed";
+  legendDiv.style.top = "20px";
+  legendDiv.style.right = "20px";
+  legendDiv.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+  legendDiv.style.color = "white";
+  legendDiv.style.padding = "15px";
+  legendDiv.style.borderRadius = "5px";
+  legendDiv.style.zIndex = "1000";
+  legendDiv.style.minWidth = "200px";
+
+  const createLegendItem = (color, text) => {
+    const item = document.createElement("div");
+    item.style.display = "flex";
+    item.style.alignItems = "center";
+    item.style.marginBottom = "8px";
+
+    const colorBox = document.createElement("div");
+    colorBox.style.width = "15px";
+    colorBox.style.height = "15px";
+    colorBox.style.backgroundColor = color;
+    colorBox.style.marginRight = "10px";
+    colorBox.style.borderRadius = "3px";
+
+    const label = document.createElement("span");
+    label.textContent = text;
+
+    item.appendChild(colorBox);
+    item.appendChild(label);
+    return item;
+  };
+
+  // Add title
+  const title = document.createElement("div");
+  title.textContent = "Near-Earth Objects";
+  title.style.fontWeight = "bold";
+  title.style.marginBottom = "10px";
+  title.style.borderBottom = "1px solid rgba(255, 255, 255, 0.3)";
+  title.style.paddingBottom = "5px";
+  legendDiv.appendChild(title);
+
+  // Add legend items
+  legendDiv.appendChild(
+    createLegendItem("#dbe9f4", "Near-Earth Asteroids (10)")
+  );
+  legendDiv.appendChild(createLegendItem("#FFFFFF", "Near-Earth Comets (3)"));
+  legendDiv.appendChild(
+    createLegendItem("#808080", "Potentially Hazardous Asteroids (2)")
+  );
+
+  document.body.appendChild(legendDiv);
+  return legendDiv;
+};
+
+// Add this line right after createMessageOverlay() call
+createLegendOverlay();
+
 // Add audio setup at the beginning of the file
 let backgroundMusic;
 let isMusicPlaying = true; // Changed to true for default on
