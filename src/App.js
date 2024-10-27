@@ -1,12 +1,22 @@
 import System from "./Components/System";
-import Legend from "./Components/Legend";
+import LoadingScreen from "./Components/LoadingScreen";
+import { useEffect, useState } from "react";
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Add this useEffect at the beginning of the System component
+  useEffect(() => {
+    // Simulate loading of assets
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000); // Adjust time as needed
+
+    return () => clearTimeout(loadingTimer);
+  }, []);
   return (
     <div className="App">
-      <System>
-        <Legend />
-      </System>
+      {isLoading ? <LoadingScreen /> : <System></System>}
     </div>
   );
 }
