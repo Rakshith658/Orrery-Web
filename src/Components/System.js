@@ -82,7 +82,7 @@ const createAudioControls = () => {
   backgroundMusic = new Audio();
   backgroundMusic.src = require("../assets/space-ambient.mp3");
   backgroundMusic.loop = true;
-  backgroundMusic.volume = 0.3;
+  backgroundMusic.volume = 0.8;
 
   // Auto-play music (will only work after user interaction due to browser policies)
   const startMusic = () => {
@@ -123,7 +123,7 @@ const createAudioControls = () => {
   volumeSlider.type = "range";
   volumeSlider.min = "0";
   volumeSlider.max = "100";
-  volumeSlider.value = "30";
+  volumeSlider.value = "80";
   volumeSlider.style.position = "fixed";
   volumeSlider.style.bottom = "60px";
   volumeSlider.style.right = "20px";
